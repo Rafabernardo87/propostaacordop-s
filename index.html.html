@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MODELO DE ENCAMINHAMENTO DA PROPOSTA</title>
+
+  <style>
+    /* Definindo a fonte Aptos Corpos */
+    body {
+      font-family: 'Aptos Corpos', sans-serif;
+    }
+  </style>
+
+  <script>
+    // Função para gerar a proposta
+    function gerarProposta() {
+      var numeroProcesso = document.getElementById("numeroProcesso").value;
+      var valorCondenacao = parseFloat(document.getElementById("valorCondenacao").value);
+      
+      // Verificar se os campos obrigatórios foram preenchidos
+      if (numeroProcesso === "" || isNaN(valorCondenacao)) {
+        alert("Preencha o número do processo e o valor total da condenação corretamente.");
+        return;
+      }
+
+      // Selecionar a modalidade de acordo
+      var modalidade = document.querySelector('input[name="modalidade"]:checked');
+      if (!modalidade) {
+        alert("Selecione a modalidade de acordo.");
+        return;
+      }
+      modalidade = modalidade.value;
+
+      // Verificar o número de parcelas, caso seja um acordo parcelado
+      var parcelas = "";
+      if (valorCondenacao > 3000 && modalidade.includes("Parcelado")) {
+        parcelas = document.getElementById("parcelas").value;
+        if (parcelas === "") {
+          alert("Insira o número de parcelas.");
+          return;
+        }
+      }
+
+      // Calcular as economias de 15% e 10%
+      var economia15 = (valorCondenacao * 0.85).toFixed(2);
+      var economia10 = (valorCondenacao * 0.90).toFixed(2);
+      var condicoesAcordo = "";
+
+      condicoesAcordo += "• Valor proposto com economia de 15%: R$ " + economia15 + "\n";
+      condicoesAcordo += "• Caso não seja aceito, será oferecido novo valor com economia de 10%: R$ " + economia10 + "\n";
+
+      if (valorCondenacao > 3000 && modalidade.includes("Parcelado")) {
+        condicoesAcordo += "• Parcelar em " + parcelas + "x\n";
+      }
+
+      // Selecionar a forma de pagamento
+      var formaPagamento = document.querySelector('input[name="formaPagamento"]:checked');
+      if (!formaPagamento) {
+        alert("Selecione a forma de pagamento.");
+        return;
+      }
+      formaPagamento = formaPagamento.value;
+
+      // Gerar o resultado final
+      var resultado = "Conforme as diretrizes estabelecidas na Política de Acordo Pós-Sentença, encaminhamos a seguir a proposta de acordo referente ao processo n.º " + numeroProcesso + ", cujo valor total da condenação é de R$ " + valorCondenacao + ":\n\n" +
+        "1. Valor da Condenação: R$ " + valorCondenacao + "\n" +
+        "2. Modalidade de Acordo Proposta: " + modalidade + "\n\n" +
+        "3. Condições do acordo:\n" + condicoesAcordo +
+        "Observação: Caso a parte não aceite o parcelamento, é necessária uma economia mínima de 10%.\n\n" +
+        "• Prazo para Resposta: 24 horas\n\n" +
+        "Forma de Pagamento: " + formaPagamento;
+
+      // Exibir o resultado na página
+      document.getElementById("resultadoTexto").innerText = resultado;
+    }
+
+    // Função para exibir o campo de parcelas apenas se o valor da condenação for superior a R$ 3.000
+    function exibirParcelas() {
+      var valorCondenacao = parseFloat(document.getElementById("valorCondenacao").value);
+      var parcelasDiv = document.getElementById("parcelasDiv");
+
+      if (valorCondenacao > 3000) {
+        parcelasDiv.style.display = "block";  // Exibe o campo de parcelas
+      } else {
+        parcelasDiv.style.display = "none";  // Esconde o campo de parcelas
+      }
+    }
+
+    // Função para resetar o formulário e limpar o resultado
+    function resetarFormulario() {
+      document.getElementById("numeroProcesso").value = "";
+      document.getElementById("valorCondenacao").value = "";
+      document.getElementById("parcelas").value = "";
+      document.querySelector('input[name="modalidade"]:checked').checked = false;
+      document.querySelector('input[name="formaPagamento"]:checked').checked = false;
+      document.getElementById("resultadoTexto").innerText = "";
+      exibirParcelas();
+    }
+
+    // Função para copiar a proposta gerada
+    function copiarProposta() {
+      var textoProposta = document.getElementById("resultadoTexto").innerText;
+
+      if (textoProposta === "") {
+        alert("Nenhuma proposta gerada para copiar.");
+        return;
+      }
+
+      navigator.clipboard.writeText(textoProposta).then(function() {
+        alert("Proposta copiada com sucesso!");
+      }, function() {
+        alert("Falha ao copiar a proposta.");
+      });
+    }
+  </script>
+
+</head>
+<body>
+
+  <h1>MODELO DE ENCAMINHAMENTO DA PROPOSTA</h1>
+
+  <!-- Formulário de inputs -->
+  <form>
+    <label for="numeroProcesso">Número do Processo:</label>
+    <input type="text" id="numeroProcesso" name="numeroProcesso" required><br><br>
+
+    <label for="valorCondenacao">Valor Total da Condenação (R$):</label>
+    <input type="number" id="valorCondenacao" name="valorCondenacao" step="0.01" oninput="exibirParcelas()" required><br><br>
+
+    <label>Modalidade de Acordo Proposta:</label><br>
+    <input type="radio" id="parcelado" name="modalidade" value="Acordo Parcelado (disponível para valores superiores a R$ 3.001,00)">
+    <label for="parcelado">Acordo Parcelado</label><br>
+    
+    <input type="radio" id="economia" name="modalidade" value="Acordo com Economia de [15% ou 10%]">
+    <label for="economia">Acordo com Economia de 15% ou 10%</label><br><br>
+
+    <!-- Campo de parcelas, escondido inicialmente -->
+    <div id="parcelasDiv" style="display:none;">
+      <label for="parcelas">Número de Parcelas:</label>
+      <input type="number" id="parcelas" name="parcelas" min="1" max="4"><br><br>
+    </div>
+
+    <label>Forma de Pagamento:</label><br>
+    <input type="radio" id="avista" name="formaPagamento" value="Pagamento à vista">
+    <label for="avista">Pagamento à vista</label><br>
+
+    <input type="radio" id="parceladoPagamento" name="formaPagamento" value="Pagamento parcelado">
+    <label for="parceladoPagamento">Pagamento parcelado</label><br><br>
+
+    <!-- Botão para gerar a proposta -->
+    <button type="button" onclick="gerarProposta()">Gerar Proposta</button>
+    
+    <!-- Botão para resetar o formulário -->
+    <button type="button" onclick="resetarFormulario()">Resetar</button>
+
+    <!-- Botão para copiar a proposta gerada -->
+    <button type="button" onclick="copiarProposta()">Copiar Proposta</button>
+  </form>
+
+  <!-- Exibição da proposta gerada -->
+  <h2>Proposta Gerada:</h2>
+  <pre id="resultadoTexto"></pre>
+
+</body>
+</html>
